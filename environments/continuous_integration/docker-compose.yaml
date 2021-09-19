@@ -1,0 +1,19 @@
+version: "3.8"
+
+services: 
+  mlops_basics:
+    container_name: mlops_basics_continuous_integration
+    build: 
+      context: ../../
+      dockerfile: environments/development/Dockerfile
+      shm_size: 12G
+      args:
+        PYTHON_VERSION: 3.9
+        APPLICATION_DIRECTORY: /mlops_basics
+    ports:
+      - 3001:3001
+    stdin_open: true
+    tty: true
+    user: 1000:1000
+    volumes:
+      - ../../../MlopsBasics:/mlops_basics
