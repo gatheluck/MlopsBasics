@@ -25,12 +25,6 @@ jobs:
     # chmod is needed to resolve above problem
     - run: chmod 777 .
 
-    - run: docker-compose exec -T mlops_basics pwd
-      working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
-
-    - run: docker-compose exec -T mlops_basics ls
-      working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
-
     - run: docker-compose exec -T mlops_basics poetry install --no-interaction
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
 
