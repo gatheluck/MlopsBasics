@@ -16,4 +16,4 @@ services:
     tty: true
     user: 1000:1000
     volumes:
-      - ../../../mlops_basics:/mlops_basics
+      - ../../../MlopsBasics:/mlops_basics
