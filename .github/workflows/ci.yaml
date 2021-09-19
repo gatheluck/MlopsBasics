@@ -24,7 +24,6 @@ jobs:
     # However, the directory made by actions/checkout does not allow write
     # chmod is needed to resolve above problem
     - run: chmod 777 .
-      working-directory: src
 
     - run: docker-compose exec -T mlops_basics poetry install --no-interaction
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
