@@ -7,6 +7,7 @@ ARG USER_NAME=default
 # Restrict python log 
 ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND noninteractive
+ENV PYTHONPATH ${APPLICATION_DIRECTORY}
 
 # Following is needed to install python 3.9
 # RUN apt update && apt install --no-install-recommends -y software-properties-common 

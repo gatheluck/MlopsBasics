@@ -1,0 +1,10 @@
+defaults:
+  - data: cola
+  - encoder: bert
+  - optimizer: adam
+  - tokenizer: bert
+  - override hydra/job_logging: colorlog
+  - override hydra/hydra_logging: colorlog
+  - _self_
+
+batch_size: 64
