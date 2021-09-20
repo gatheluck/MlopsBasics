@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Final, cast
+from typing import Any, Final
 
 import hydra
 import pandas as pd
@@ -7,8 +7,6 @@ import pytorch_lightning as pl
 import torch
 from hydra.utils import instantiate
 from omegaconf.omegaconf import OmegaConf
-from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.callbacks.early_stopping import EarlyStopping
 
 from src.factory.lit.callback import SamplesVisualisationLogger
 
@@ -44,6 +42,7 @@ def main(cfg) -> None:
     data: Final = instantiate(cfg.data, tokenizer=tokenizer)
 
     encoder: torch.nn.Module = instantiate(cfg.encoder, num_labels=data.num_classes)
+    print(encoder)
 
 
 if __name__ == "__main__":

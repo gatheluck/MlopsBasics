@@ -1,1 +1,1 @@
-from .cola import ColaDataModule
+from .cola import ColaDataModule  # noqa

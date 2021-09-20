@@ -2,10 +2,8 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Final
 
-import numpy
 import pandas as pd
 import pytorch_lightning as pl
-import torch
 import wandb
 
 logger = logging.getLogger(__name__)
