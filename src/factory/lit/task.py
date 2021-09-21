@@ -1,21 +1,26 @@
 from typing import Final
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import pytorch_lightning as pl
+import seaborn as sns
 import torch
 import torchmetrics
 import wandb
 from hydra.utils import instantiate
-
-# from sklearn.metrics import accuracy_score
-# from transformers import AutoModel
+from sklearn.metrics import confusion_matrix
 
 
 class Classifier(pl.LightningModule):
     def __init__(
-        self, encoder: torch.nn.Module, num_classes: int, optimizer_cfg, scheduler_cfg
+        self,
+        encoder: torch.nn.Module,
+        num_classes: int,
+        optimizer_cfg,
     ) -> None:
-        self.save_hyperparameters(optimizer_cfg, scheduler_cfg)
-
+        super().__init__()
+        self.optimizer_cfg: Final = optimizer_cfg
         self.encoder: torch.nn.Module = encoder
 
         self.train_accuracy_metric = torchmetrics.Accuracy()
@@ -34,7 +39,7 @@ class Classifier(pl.LightningModule):
         return self.encoder(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            lables=labels,
+            labels=labels,
         )
 
     def training_step(self, batch, batch_idx):
@@ -78,16 +83,33 @@ class Classifier(pl.LightningModule):
         return {"labels": labels, "logits": outputs.logits}
 
     def validation_epoch_end(self, outputs):
-        labels = torch.cat([x["labels"] for x in outputs])
-        logits = torch.cat([x["logits"] for x in outputs])
+        labels: Final = torch.cat([x["labels"] for x in outputs])
+        logits: Final = torch.cat([x["logits"] for x in outputs])
+        preds: Final = torch.argmax(logits, 1)
+
+        # self.logger.experiment.log(
+        #     {
+        #         "conf": wandb.plot.confusion_matrix(
+        #             probs=logits.numpy(), y_true=labels.numpy()
+        #         )
+        #     }
+        # )
+
+        # wandb.log({"confusion_matrix": wandb.sklearn.plot_confusion_matrix(labels.numpy(), preds)})
+
+        data = confusion_matrix(labels.numpy(), preds.numpy())
+        df_cm = pd.DataFrame(data, columns=np.unique(labels), index=np.unique(labels))
+        df_cm.index.name = "Actual"
+        df_cm.columns.name = "Predicted"
+        plt.figure(figsize=(7, 4))
+        plot = sns.heatmap(
+            df_cm, cmap="Blues", annot=True, annot_kws={"size": 16}
+        )  # font size
+        self.logger.experiment.log({"Confusion Matrix": wandb.Image(plot)})
 
         self.logger.experiment.log(
-            {
-                "conf": wandb.plot.confusion_matrix(
-                    probs=logits.numpy(), y_true=labels.numpy()
-                )
-            }
+            {"roc": wandb.plot.roc_curve(labels.numpy(), logits.numpy())}
         )
 
     def configure_optimizers(self):
-        return {"optimizer": instantiate(self.hparams["optimizer_cfg"])}
+        return {"optimizer": instantiate(self.optimizer_cfg, params=self.parameters())}
