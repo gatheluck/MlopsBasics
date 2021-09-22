@@ -24,7 +24,7 @@ class ColaDataModule(pl.LightningDataModule):
         self.train_data = cola_dataset["train"]
         self.val_data = cola_dataset["validation"]
 
-    def _tokenize_data(self, example):
+    def tokenize_data(self, example):
         return self.tokenizer(
             example["sentence"],
             truncation=True,
@@ -35,12 +35,12 @@ class ColaDataModule(pl.LightningDataModule):
     def setup(self, stage=None):
         # we set up only relevant datasets when stage is specified
         if stage == "fit" or stage is None:
-            self.train_data = self.train_data.map(self._tokenize_data, batched=True)
+            self.train_data = self.train_data.map(self.tokenize_data, batched=True)
             self.train_data.set_format(
                 type="torch", columns=["input_ids", "attention_mask", "label"]
             )
 
-            self.val_data = self.val_data.map(self._tokenize_data, batched=True)
+            self.val_data = self.val_data.map(self.tokenize_data, batched=True)
             self.val_data.set_format(
                 type="torch",
                 columns=["input_ids", "attention_mask", "label"],
