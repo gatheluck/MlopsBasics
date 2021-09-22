@@ -374,13 +374,13 @@ xxhash = "*"
 [package.extras]
 apache-beam = ["apache-beam (>=2.26.0)"]
 benchmarks = ["numpy (==1.18.5)", "tensorflow (==2.3.0)", "torch (==1.6.0)", "transformers (==3.0.2)"]
-dev = ["absl-py", "pytest", "pytest-xdist", "apache-beam (>=2.26.0)", "elasticsearch", "aiobotocore", "boto3", "botocore", "faiss-cpu", "fsspec", "moto[s3,server] (==2.0.4)", "rarfile (>=4.0)", "s3fs (==2021.08.1)", "tensorflow (>=2.3)", "torch", "transformers", "bs4", "conllu", "langdetect", "lxml", "mwparserfromhell", "nltk", "openpyxl", "py7zr", "tldextract", "zstandard", "bert-score (>=0.3.6)", "rouge-score", "sacrebleu", "scipy", "seqeval", "scikit-learn", "jiwer", "sentencepiece", "toml (>=0.10.1)", "requests-file (>=1.5.1)", "tldextract (>=3.1.0)", "texttable (>=1.6.3)", "Werkzeug (>=1.0.1)", "six (>=1.15.0,<1.16.0)", "wget (>=3.2)", "pytorch-nlp (==0.5.0)", "pytorch-lightning", "fastBPE (==0.1.0)", "fairseq", "black (==21.4b0)", "flake8 (==3.7.9)", "isort", "pyyaml (>=5.3.1)", "importlib-resources"]
+dev = ["absl-py", "pytest", "pytest-xdist", "apache-beam (>=2.26.0)", "elasticsearch", "aiobotocore", "boto3", "botocore", "faiss-cpu", "fsspec", "moto[server,s3] (==2.0.4)", "rarfile (>=4.0)", "s3fs (==2021.08.1)", "tensorflow (>=2.3)", "torch", "transformers", "bs4", "conllu", "langdetect", "lxml", "mwparserfromhell", "nltk", "openpyxl", "py7zr", "tldextract", "zstandard", "bert-score (>=0.3.6)", "rouge-score", "sacrebleu", "scipy", "seqeval", "scikit-learn", "jiwer", "sentencepiece", "toml (>=0.10.1)", "requests-file (>=1.5.1)", "tldextract (>=3.1.0)", "texttable (>=1.6.3)", "Werkzeug (>=1.0.1)", "six (>=1.15.0,<1.16.0)", "wget (>=3.2)", "pytorch-nlp (==0.5.0)", "pytorch-lightning", "fastBPE (==0.1.0)", "fairseq", "black (==21.4b0)", "flake8 (==3.7.9)", "isort", "pyyaml (>=5.3.1)", "importlib-resources"]
 docs = ["docutils (==0.16.0)", "recommonmark", "sphinx (==3.1.2)", "sphinx-markdown-tables", "sphinx-rtd-theme (==0.4.3)", "sphinxext-opengraph (==0.4.1)", "sphinx-copybutton", "fsspec", "s3fs", "sphinx-panels", "sphinx-inline-tabs", "myst-parser"]
 quality = ["black (==21.4b0)", "flake8 (==3.7.9)", "isort", "pyyaml (>=5.3.1)"]
 s3 = ["fsspec", "boto3", "botocore", "s3fs"]
 tensorflow = ["tensorflow (>=2.2.0)"]
 tensorflow_gpu = ["tensorflow-gpu (>=2.2.0)"]
-tests = ["absl-py", "pytest", "pytest-xdist", "apache-beam (>=2.26.0)", "elasticsearch", "aiobotocore", "boto3", "botocore", "faiss-cpu", "fsspec", "moto[s3,server] (==2.0.4)", "rarfile (>=4.0)", "s3fs (==2021.08.1)", "tensorflow (>=2.3)", "torch", "transformers", "bs4", "conllu", "langdetect", "lxml", "mwparserfromhell", "nltk", "openpyxl", "py7zr", "tldextract", "zstandard", "bert-score (>=0.3.6)", "rouge-score", "sacrebleu", "scipy", "seqeval", "scikit-learn", "jiwer", "sentencepiece", "toml (>=0.10.1)", "requests-file (>=1.5.1)", "tldextract (>=3.1.0)", "texttable (>=1.6.3)", "Werkzeug (>=1.0.1)", "six (>=1.15.0,<1.16.0)", "wget (>=3.2)", "pytorch-nlp (==0.5.0)", "pytorch-lightning", "fastBPE (==0.1.0)", "fairseq", "importlib-resources"]
+tests = ["absl-py", "pytest", "pytest-xdist", "apache-beam (>=2.26.0)", "elasticsearch", "aiobotocore", "boto3", "botocore", "faiss-cpu", "fsspec", "moto[server,s3] (==2.0.4)", "rarfile (>=4.0)", "s3fs (==2021.08.1)", "tensorflow (>=2.3)", "torch", "transformers", "bs4", "conllu", "langdetect", "lxml", "mwparserfromhell", "nltk", "openpyxl", "py7zr", "tldextract", "zstandard", "bert-score (>=0.3.6)", "rouge-score", "sacrebleu", "scipy", "seqeval", "scikit-learn", "jiwer", "sentencepiece", "toml (>=0.10.1)", "requests-file (>=1.5.1)", "tldextract (>=3.1.0)", "texttable (>=1.6.3)", "Werkzeug (>=1.0.1)", "six (>=1.15.0,<1.16.0)", "wget (>=3.2)", "pytorch-nlp (==0.5.0)", "pytorch-lightning", "fastBPE (==0.1.0)", "fairseq", "importlib-resources"]
 torch = ["torch"]
 
 [[package]]
@@ -607,6 +607,14 @@ Werkzeug = ">=2.0"
 [package.extras]
 async = ["asgiref (>=3.2)"]
 dotenv = ["python-dotenv"]
+
+[[package]]
+name = "flatbuffers"
+version = "2.0"
+description = "The FlatBuffers serialization format for Python"
+category = "main"
+optional = false
+python-versions = "*"
 
 [[package]]
 name = "flatten-dict"
@@ -1265,6 +1273,19 @@ antlr4-python3-runtime = "4.8"
 PyYAML = ">=5.1.0"
 
 [[package]]
+name = "onnxruntime"
+version = "1.8.1"
+description = "ONNX Runtime is a runtime accelerator for Machine Learning models"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+flatbuffers = "*"
+numpy = ">=1.16.6"
+protobuf = "*"
+
+[[package]]
 name = "opencv-python-headless"
 version = "4.5.3.56"
 description = "Wrapper package for OpenCV python bindings."
@@ -1485,7 +1506,7 @@ pyparsing = ">=2.1.4"
 
 [[package]]
 name = "pydrive2"
-version = "1.9.4"
+version = "1.10.0"
 description = "Google Drive API made easy. Maintained fork of PyDrive."
 category = "main"
 optional = false
@@ -2487,7 +2508,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "5f5516a38c4c5a7fc2cdbc19748937063e11ad042d25f77bdc110a8e23f3946a"
+content-hash = "d6b24f3a951d17fe8f3aba58c83c337bed3e5bf803611510170daa262c41e2d2"
 
 [metadata.files]
 absl-py = [
@@ -2821,6 +2842,10 @@ flake8 = [
 flask = [
     {file = "Flask-2.0.1-py3-none-any.whl", hash = "sha256:a6209ca15eb63fc9385f38e452704113d679511d9574d09b2cf9183ae7d20dc9"},
     {file = "Flask-2.0.1.tar.gz", hash = "sha256:1c4c257b1892aec1398784c63791cbaa43062f1f7aeb555c4da961b20ee68f55"},
+]
+flatbuffers = [
+    {file = "flatbuffers-2.0-py2.py3-none-any.whl", hash = "sha256:3751954f0604580d3219ae49a85fafec9d85eec599c0b96226e1bc0b48e57474"},
+    {file = "flatbuffers-2.0.tar.gz", hash = "sha256:12158ab0272375eab8db2d663ae97370c33f152b27801fa6024e1d6105fd4dd2"},
 ]
 flatten-dict = [
     {file = "flatten-dict-0.4.2.tar.gz", hash = "sha256:506a96b6e6f805b81ae46a0f9f31290beb5fa79ded9d80dbe1b7fa236ab43076"},
@@ -3315,6 +3340,24 @@ omegaconf = [
     {file = "omegaconf-2.1.1-py3-none-any.whl", hash = "sha256:be93d73eaa2564fbe52d88ee13e3b79f4c6e04876b2f326551a21391f7dc6367"},
     {file = "omegaconf-2.1.1.tar.gz", hash = "sha256:c65e05530369484e074a24038fe31812c73561aa9d916abfd1209e4073136ae5"},
 ]
+onnxruntime = [
+    {file = "onnxruntime-1.8.1-cp36-cp36m-macosx_10_12_x86_64.whl", hash = "sha256:2d8eb89d4d62ba956f5b3392b0a02e50dfa3ba6e255561c16e3fd10d5a2b0de5"},
+    {file = "onnxruntime-1.8.1-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:aa7346af63eade9a041b79363b2be04a60e4a5d4fe82bce4de2b1cdc3f63ccf4"},
+    {file = "onnxruntime-1.8.1-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:2201b12c736c7c1ce683289ff012a768dc6ea0eeb81c9276fde31c86d6aebdf6"},
+    {file = "onnxruntime-1.8.1-cp36-cp36m-win_amd64.whl", hash = "sha256:579a38f5abee3e89684ee223701d62409be20742767356d982e92cf2d70bbf0f"},
+    {file = "onnxruntime-1.8.1-cp37-cp37m-macosx_10_12_x86_64.whl", hash = "sha256:417d09475d3928b224225e4bd1a6aa8ce061de7458ccda2b86dfe12508f34480"},
+    {file = "onnxruntime-1.8.1-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7395d86c1c18c5e191f6d7cfe79ecc590fe8ed30f4b01a65e1da6c6cf3300e42"},
+    {file = "onnxruntime-1.8.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c140299b0f94f4a3cdf872308b21941622b973868f491a37e7f3148f96d69834"},
+    {file = "onnxruntime-1.8.1-cp37-cp37m-win_amd64.whl", hash = "sha256:1c2cf7d5fe89e74f363596d90b952c367653763f16655a8b5060c7dea83868b9"},
+    {file = "onnxruntime-1.8.1-cp38-cp38-macosx_10_12_x86_64.whl", hash = "sha256:2df2999fdc0f1f5bcc87365b93fd951adbcdb615d312b1eb69aa3ffaeb0d66c3"},
+    {file = "onnxruntime-1.8.1-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:923721385a33d681d20878a090ae9e9e653c40eaa57665a4a87ddbcdbbd85e0b"},
+    {file = "onnxruntime-1.8.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:695e9badeb538bae87e25ee17c330c50a32114ebe6eae9bf2da03d66bda49888"},
+    {file = "onnxruntime-1.8.1-cp38-cp38-win_amd64.whl", hash = "sha256:8fd9200c327042359ff733739ca4d0e2491d52f540b31a3fa29e280503aba11d"},
+    {file = "onnxruntime-1.8.1-cp39-cp39-macosx_10_12_x86_64.whl", hash = "sha256:89fa6e392637c94c17e693772294ed9afe2403832f78c5efa1ccd79f463c5646"},
+    {file = "onnxruntime-1.8.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a7a98e820b6a2d9a23908efad28ce4b0c7181e897273e70daa22b6110019bd7b"},
+    {file = "onnxruntime-1.8.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:affda6e92c4de3a3d7b35c8da35dedf8fc618b17638f719bb5398accb5d0bb57"},
+    {file = "onnxruntime-1.8.1-cp39-cp39-win_amd64.whl", hash = "sha256:cac8e35f953ff9898f0b5fdca0b76f492ae508e99e2eeb02ea70339e25b96715"},
+]
 opencv-python-headless = [
     {file = "opencv-python-headless-4.5.3.56.tar.gz", hash = "sha256:3308d22efec8a69932709fc76456ef7e0d1cd9eb2272d94b7e5df0674d3e324f"},
     {file = "opencv_python_headless-4.5.3.56-cp36-cp36m-macosx_10_15_x86_64.whl", hash = "sha256:b563106e93525bd30072a27448cc2b5c11e45bf6025e74e1d40efd5349a31736"},
@@ -3586,8 +3629,8 @@ pydot = [
     {file = "pydot-1.4.2.tar.gz", hash = "sha256:248081a39bcb56784deb018977e428605c1c758f10897a339fce1dd728ff007d"},
 ]
 pydrive2 = [
-    {file = "PyDrive2-1.9.4-py3-none-any.whl", hash = "sha256:9344d32518bebd512658a69e8f6782ee63a0ef88fb17f54d1bc30bdc49039f58"},
-    {file = "PyDrive2-1.9.4.tar.gz", hash = "sha256:7ec594d2a3ae142fc0d137153424b61631f0a2eaf7c6ba3647f42edc460b9139"},
+    {file = "PyDrive2-1.10.0-py3-none-any.whl", hash = "sha256:14c239bcd3e6e65b771ad4e2d8f7ca991636c9aec82b730479a60368733a4fbb"},
+    {file = "PyDrive2-1.10.0.tar.gz", hash = "sha256:f7bd19b4ff1ef6c0b922fb6ac55c0d94724ab537387ae4a1de797784d77463ab"},
 ]
 pyflakes = [
     {file = "pyflakes-2.3.1-py2.py3-none-any.whl", hash = "sha256:7893783d01b8a89811dd72d7dfd4d84ff098e5eed95cfa8905b22bbffe52efc3"},
