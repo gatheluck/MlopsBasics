@@ -1,7 +1,9 @@
+import pathlib
 from typing import Final
 
 import matplotlib.pyplot as plt
 import numpy as np
+import onnxruntime
 import pandas as pd
 import pytorch_lightning as pl
 import seaborn as sns
@@ -9,7 +11,10 @@ import torch
 import torchmetrics
 import wandb
 from hydra.utils import instantiate
+from scipy.special import softmax
 from sklearn.metrics import confusion_matrix
+
+from src.misc.profile import timing
 
 
 class Classifier(pl.LightningModule):
@@ -20,6 +25,7 @@ class Classifier(pl.LightningModule):
         optimizer_cfg,
     ) -> None:
         super().__init__()
+        self.save_hyperparameters()
         self.optimizer_cfg: Final = optimizer_cfg
         self.encoder: torch.nn.Module = encoder
 
@@ -113,3 +119,56 @@ class Classifier(pl.LightningModule):
 
     def configure_optimizers(self):
         return {"optimizer": instantiate(self.optimizer_cfg, params=self.parameters())}
+
+
+class ClassificationPredictor:
+    def __init__(self, classifier, processor) -> None:
+        self.classifier: Final = classifier
+        self.classifier.eval()
+        self.classifier.freeze()
+
+        self.processor: Final = processor
+        self.softmax: Final = torch.nn.Softmax(dim=1)
+        self.lables: Final = ["unacceptable", "acceptable"]
+
+    @timing
+    def predict(self, input):
+        input_dict = {"sentence": input}
+        processed_input = self.processor.tokenize_data(input_dict)
+        logits = self.classifier(
+            torch.tensor([processed_input["input_ids"]]),
+            torch.tensor([processed_input["attention_mask"]]),
+        )
+        scores = self.softmax(logits[0]).tolist()[0]
+
+        predictions = list()
+        for score, label in zip(scores, self.lables):
+            predictions.append({"label": label, "score": score})
+
+        return predictions
+
+
+class OnnxClassificationPredictor:
+    def __init__(self, model_path: pathlib.Path, processor) -> None:
+        self.onnx_session = onnxruntime.InferenceSession(str(model_path))
+        self.processor: Final = processor
+        self.lables: Final = ["unacceptable", "acceptable"]
+
+    @timing
+    def predict(self, input):
+        input_dict = {"sentence": input}
+        processed_input = self.processor.tokenize_data(input_dict)
+
+        onnx_inputs = {
+            "input_ids": np.expand_dims(processed_input["input_ids"], axis=0),
+            "attention_mask": np.expand_dims(processed_input["attention_mask"], axis=0),
+        }
+        # None will return all the outputs.
+        onnx_outputs = self.onnx_session.run(None, onnx_inputs)
+        scores = softmax(onnx_outputs[0])[0]
+
+        predictions = list()
+        for score, label in zip(scores, self.lables):
+            predictions.append({"label": label, "score": score})
+
+        return predictions
