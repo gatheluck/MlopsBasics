@@ -3,7 +3,6 @@ import pathlib
 from typing import Final
 
 import hydra
-import torch
 from hydra.utils import instantiate
 from omegaconf.omegaconf import OmegaConf
 
@@ -20,9 +19,7 @@ def main(cfg) -> None:
     cwd: Final = pathlib.Path(hydra.utils.get_original_cwd())
     onnx_model_path: Final = cwd / cfg.onnx_model_path
 
-    # data module
-    tokenizer: torch.nn.Module = instantiate(cfg.tokenizer)
-    data: Final = instantiate(cfg.data, tokenizer=tokenizer)
+    data: Final = instantiate(cfg.data)
 
     predictor: Final = OnnxClassificationPredictor(onnx_model_path, data)
 

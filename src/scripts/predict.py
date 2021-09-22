@@ -4,7 +4,6 @@ from typing import Final
 
 import hydra
 import pytorch_lightning as pl
-import torch
 from hydra.utils import instantiate
 from omegaconf.omegaconf import OmegaConf
 
@@ -21,13 +20,9 @@ def main(cfg) -> None:
     cwd: Final = pathlib.Path(hydra.utils.get_original_cwd())
     checkpoint_path: Final = cwd / cfg.checkpoint_path
 
-    # data module
-    tokenizer: torch.nn.Module = instantiate(cfg.tokenizer)
-    data: Final = instantiate(cfg.data, tokenizer=tokenizer)
+    data: Final = instantiate(cfg.data)
 
-    # task
     classifier: pl.LightningModule = Classifier.load_from_checkpoint(checkpoint_path)
-
     predictor: Final = ClassificationPredictor(classifier, data)
 
     print(predictor.predict(cfg.sentence))

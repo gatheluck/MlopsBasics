@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 def convert_to_onnx(cfg) -> None:
     cwd: Final = pathlib.Path(hydra.utils.get_original_cwd())
     checkpoint_path: Final = cwd / cfg.checkpoint_path
-    export_path: Final = cwd / cfg.export_path
+    export_path: Final = pathlib.Path(cfg.export_path)
+    export_path.parent.mkdir(parents=True, exist_ok=True)
 
     logger.info(f"Loading pre-trained model from: {checkpoint_path}")
     model: Final = Classifier.load_from_checkpoint(checkpoint_path)
 
     # data module
-    tokenizer: torch.nn.Module = instantiate(cfg.tokenizer)
-    data: Final = instantiate(cfg.data, tokenizer=tokenizer)
+    data: Final = instantiate(cfg.data)
     data.prepare_data()
     data.setup()
 

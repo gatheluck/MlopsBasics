@@ -73,8 +73,7 @@ def main(cfg) -> None:
     logger.info(OmegaConf.to_yaml(cfg, resolve=True))
 
     # data module
-    tokenizer: torch.nn.Module = instantiate(cfg.tokenizer)
-    data: Final = instantiate(cfg.data, tokenizer=tokenizer)
+    data: Final = instantiate(cfg.data)
 
     # task
     encoder: torch.nn.Module = instantiate(cfg.encoder, num_labels=data.num_classes)

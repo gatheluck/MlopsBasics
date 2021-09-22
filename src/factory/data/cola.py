@@ -3,21 +3,22 @@ from typing import Final
 import pytorch_lightning as pl
 import torch
 from datasets import load_dataset
+from transformers import AutoTokenizer
 
 
 class ColaDataModule(pl.LightningDataModule):
     def __init__(
         self,
-        batch_size: int,
-        max_length: int,
-        tokenizer: torch.nn.Module,
+        tokenizer_name: str = "google/bert_uncased_L-2_H-128_A-2",
+        batch_size: int = 64,
+        max_length: int = 128,
     ):
         super().__init__()
 
         self._num_classes: Final = 2
         self.batch_size: Final = batch_size
         self.max_length: Final = max_length
-        self.tokenizer: Final = tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
 
     def prepare_data(self):
         cola_dataset = load_dataset("glue", "cola")

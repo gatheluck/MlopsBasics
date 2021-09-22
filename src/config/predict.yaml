@@ -1,9 +1,12 @@
 defaults:
   - data: cola
-  - tokenizer: bert
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
   - _self_
+
+hydra:
+  run:
+    dir: outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
 
 checkpoint_path: models/best-checkpoint.ckpt
 sentence: "The boy is sitting on a bench"

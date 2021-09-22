@@ -2,10 +2,13 @@ defaults:
   - data: cola
   - encoder: bert
   - optimizer: adam
-  - tokenizer: bert
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
   - _self_
+
+hydra:
+  run:
+    dir: outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
 
 deterministic: false
 batch_size: 64
