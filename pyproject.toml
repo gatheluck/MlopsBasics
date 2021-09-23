@@ -39,6 +39,14 @@ pytest-cov = "^2.12.1"
 profile = "black"
 
 [[tool.mypy.overrides]]
+module = "albumentations"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "albumentations.pytorch"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = "matplotlib"
 ignore_missing_imports = true
 
@@ -68,6 +76,14 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "sklearn.metrics"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "torchvision"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "torchvision.datasets"
 ignore_missing_imports = true
 
 [build-system]

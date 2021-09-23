@@ -1,5 +1,5 @@
 import pathlib
-from typing import Final
+from typing import Dict, Final, List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,87 +11,95 @@ import torch
 import torchmetrics
 import wandb
 from hydra.utils import instantiate
+from omegaconf import DictConfig
 from scipy.special import softmax
 from sklearn.metrics import confusion_matrix
+from torch.nn.modules.loss import _Loss
+from torchmetrics.classification.stat_scores import StatScores
 
 from src.misc.profile import timing
 
 
 class Classifier(pl.LightningModule):
+    """Lightning Module for supervised image classfication.
+
+    Attributes:
+        encoder (nn.Module): The encoder to extract feature for classification.
+        optimizer_cfg (DictConfig): The config for optimizer.
+        scheduler_cfg (DictConfig): The config for sheduler.
+        criterion (_Loss): The loss used by optimizer.
+        num_classes (int): The number of class.
+
+    """
+
     def __init__(
         self,
         encoder: torch.nn.Module,
         num_classes: int,
-        optimizer_cfg,
+        optimizer_cfg: DictConfig,
+        scheduler_cfg: DictConfig,
+        scheduler_monitor: str = "train/accuracy",
     ) -> None:
         super().__init__()
         self.save_hyperparameters()
+        self.encoder = encoder
         self.optimizer_cfg: Final = optimizer_cfg
-        self.encoder: torch.nn.Module = encoder
+        self.scheduler_cfg: Final = scheduler_cfg
+        self.scheduler_monitor: Final = scheduler_monitor
 
-        self.train_accuracy_metric = torchmetrics.Accuracy()
-        self.val_accuracy_metric = torchmetrics.Accuracy()
-        self.f1_metric = torchmetrics.F1(num_classes=num_classes)
-        self.precision_macro_metric = torchmetrics.Precision(
-            average="macro", num_classes=num_classes
-        )
-        self.recall_macro_metric = torchmetrics.Recall(
-            average="macro", num_classes=num_classes
-        )
-        self.precision_micro_metric = torchmetrics.Precision(average="micro")
-        self.recall_micro_metric = torchmetrics.Recall(average="micro")
+        self.criterion: Final[_Loss] = torch.nn.CrossEntropyLoss()
+        self.metrics: Final = self._get_metrics(num_classes)
 
-    def forward(self, input_ids, attention_mask, labels=None) -> torch.Tensor:  # type: ignore[override]
-        return self.encoder(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            labels=labels,
-        )
+    def forward(self, x: torch.Tensor) -> torch.Tensor:  # type: ignore[override]
+        return self.encoder(x)
 
-    def training_step(self, batch, batch_idx):
-        labels: Final = batch["label"]
-        outputs = self.forward(
-            batch["input_ids"], batch["attention_mask"], labels=labels
-        )
-        preds = torch.argmax(outputs.logits, 1)
+    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:  # type: ignore[override]
+        """Single training step.
 
-        # Metrics
-        train_acc = self.train_accuracy_metric(preds, batch["label"])
+        Args:
+            batch (Tuple[torch.Tensor, torch.Tensor]): An input tensor and label.
+            batch_index (int): An index of the batch.
+
+        Returns:
+            torch.Tensor: A loss tensor.
+                If multiple nodes are used for training, return type should be Dict[str, torch.Tensor].
+
+        """
+        x, t = batch  # DO NOT need to send GPUs manually.
+        logits = self.forward(x)
+        loss = self.criterion(logits, t)
 
         # Logging metrics
-        self.log("train/loss", outputs.loss, prog_bar=True, on_epoch=True)
-        self.log("train/acc", train_acc, prog_bar=True, on_epoch=True)
-        return outputs.loss
-
-    def validation_step(self, batch, batch_idx):
-        labels: Final = batch["label"]
-        outputs = self.forward(
-            batch["input_ids"], batch["attention_mask"], labels=labels
-        )
-        preds = torch.argmax(outputs.logits, 1)
-
-        # Metrics
-        valid_acc = self.val_accuracy_metric(preds, labels)
-        precision_macro = self.precision_macro_metric(preds, labels)
-        recall_macro = self.recall_macro_metric(preds, labels)
-        precision_micro = self.precision_micro_metric(preds, labels)
-        recall_micro = self.recall_micro_metric(preds, labels)
-        f1 = self.f1_metric(preds, labels)
-
-        # Logging metrics
-        self.log("valid/loss", outputs.loss, prog_bar=True, on_step=True)
-        self.log("valid/acc", valid_acc, prog_bar=True, on_epoch=True)
-        self.log("valid/precision_macro", precision_macro, prog_bar=True, on_epoch=True)
-        self.log("valid/recall_macro", recall_macro, prog_bar=True, on_epoch=True)
-        self.log("valid/precision_micro", precision_micro, prog_bar=True, on_epoch=True)
-        self.log("valid/recall_micro", recall_micro, prog_bar=True, on_epoch=True)
-        self.log("valid/f1", f1, prog_bar=True, on_epoch=True)
-        return {"labels": labels, "logits": outputs.logits}
-
-    def validation_epoch_end(self, outputs):
-        labels: Final = torch.cat([x["labels"] for x in outputs])
-        logits: Final = torch.cat([x["logits"] for x in outputs])
         preds: Final = torch.argmax(logits, 1)
+        self._log_metrics("train", preds, t, loss.detach(), self.metrics)
+
+        return loss
+
+    def validation_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> Dict[str, torch.Tensor]:  # type: ignore[override]
+        """Single validation step.
+
+        Args:
+            batch (Tuple[torch.Tensor, torch.Tensor]): The tuple of input tensor and label.
+            batch_index (int): The index of batch.
+
+        Returns:
+            Dict[str, torch.Tensor]: The dict of log info.
+
+        """
+        x, t = batch  # DO NOT need to send GPU manually.
+        logits = self.forward(x)
+        loss = self.criterion(logits, t)
+
+        # Logging metrics
+        preds: Final = torch.argmax(logits, 1)
+        self._log_metrics("valid", preds, t, loss.detach(), self.metrics)
+
+        return {"targets": t, "logits": logits.detach()}
+
+    def validation_epoch_end(self, outputs: List[Dict[str, torch.Tensor]]) -> None:  # type: ignore[override]
+        targets: Final = torch.cat([x["targets"] for x in outputs]).cpu()
+        logits: Final = torch.cat([x["logits"] for x in outputs]).cpu()
+        preds: Final = torch.argmax(logits, 1).cpu()
 
         # self.logger.experiment.log(
         #     {
@@ -103,8 +111,8 @@ class Classifier(pl.LightningModule):
 
         # wandb.log({"confusion_matrix": wandb.sklearn.plot_confusion_matrix(labels.numpy(), preds)})
 
-        data = confusion_matrix(labels.numpy(), preds.numpy())
-        df_cm = pd.DataFrame(data, columns=np.unique(labels), index=np.unique(labels))
+        data = confusion_matrix(targets.numpy(), preds.numpy())
+        df_cm = pd.DataFrame(data, columns=np.unique(targets), index=np.unique(targets))
         df_cm.index.name = "Actual"
         df_cm.columns.name = "Predicted"
         plt.figure(figsize=(7, 4))
@@ -114,11 +122,49 @@ class Classifier(pl.LightningModule):
         self.logger.experiment.log({"Confusion Matrix": wandb.Image(plot)})
 
         self.logger.experiment.log(
-            {"roc": wandb.plot.roc_curve(labels.numpy(), logits.numpy())}
+            {"roc": wandb.plot.roc_curve(targets.numpy(), logits.numpy())}
         )
 
     def configure_optimizers(self):
-        return {"optimizer": instantiate(self.optimizer_cfg, params=self.parameters())}
+        """setup optimzier and scheduler."""
+        optimizer = instantiate(self.optimizer_cfg, params=self.parameters())
+        scheduler = {
+            "scheduler": instantiate(self.scheduler_cfg, optimizer),
+            "monitor": self.scheduler_monitor,
+        }
+
+        return dict(optimizer=optimizer, lr_scheduler=scheduler)
+
+    def _get_metrics(self, num_classes: int) -> Dict[str, StatScores]:
+        return {
+            "train/accuracy": torchmetrics.Accuracy(),
+            "valid/accuracy": torchmetrics.Accuracy(),
+            "valid/precision_micro": torchmetrics.Precision(average="micro"),
+            "valid/precision_macro": torchmetrics.Precision(
+                average="macro", num_classes=num_classes
+            ),
+            "valid/recall_micro": torchmetrics.Recall(average="micro"),
+            "valid/recall_macro": torchmetrics.Recall(
+                average="macro", num_classes=num_classes
+            ),
+            "valid/f1": torchmetrics.F1(num_classes=num_classes),
+        }
+
+    def _log_metrics(
+        self,
+        stage: str,
+        preds: torch.Tensor,
+        targets: torch.Tensor,
+        loss: torch.Tensor,
+        metrics: Dict[str, StatScores],
+    ) -> None:
+
+        self.log(f"{stage}/loss", loss, prog_bar=True, on_step=True)
+
+        for k, metric in metrics.items():
+            if k.startswith(stage):
+                value = metric(preds.cpu(), targets.cpu())
+                self.log(k, value, prog_bar=True, on_epoch=True)
 
 
 class ClassificationPredictor:
@@ -155,7 +201,7 @@ class OnnxClassificationPredictor:
         self.lables: Final = ["unacceptable", "acceptable"]
 
     @timing
-    def predict(self, input):
+    def predict(self, input: str):
         input_dict = {"sentence": input}
         processed_input = self.processor.tokenize_data(input_dict)
 
