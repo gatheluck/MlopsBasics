@@ -1,10 +1,13 @@
 defaults:
-  - data: cola
-  - tokenizer: bert
+  - data: cifar10
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
   - _self_
 
+hydra:
+  run:
+    dir: outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+
 checkpoint_path: models/best-checkpoint.ckpt
 export_path: models/model.onnx
-batch_size: 64
+batch_size: 4

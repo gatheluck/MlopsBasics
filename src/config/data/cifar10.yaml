@@ -1,0 +1,2 @@
+_target_: src.factory.data.cifar10.Cifar10DataModule
+batch_size: ${batch_size}

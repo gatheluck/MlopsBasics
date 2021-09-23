@@ -1,15 +1,19 @@
 defaults:
-  - data: cola
-  - encoder: bert
-  - optimizer: adam
-  - tokenizer: bert
+  - data: cifar10
+  - encoder: resnet50
+  - optimizer: sgd
+  - scheduler: cosin
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
   - _self_
 
+hydra:
+  run:
+    dir: outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+
 deterministic: false
-batch_size: 64
-max_epochs: 1
+batch_size: 256
+max_epochs: 30
 log_every_n_steps: 10
 limit_train_batches: 0.25
 limit_val_batches: ${limit_train_batches}

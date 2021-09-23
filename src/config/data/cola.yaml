@@ -1,3 +1,0 @@
-_target_: src.factory.data.cola.ColaDataModule
-batch_size: ${batch_size}
-max_length: 128
