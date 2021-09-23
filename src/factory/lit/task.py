@@ -172,7 +172,6 @@ class ClassificationPredictor:
         self.classifier: Final = classifier
         self.classifier.eval()
         self.classifier.freeze()
-
         self.softmax: Final = torch.nn.Softmax(dim=1)
         self.labels: Final = labels
 
@@ -202,26 +201,37 @@ class ClassificationPredictor:
 
 
 class OnnxClassificationPredictor:
-    def __init__(self, model_path: pathlib.Path, processor) -> None:
+    def __init__(self, model_path: pathlib.Path, labels: List[str]) -> None:
         self.onnx_session = onnxruntime.InferenceSession(str(model_path))
-        self.processor: Final = processor
-        self.lables: Final = ["unacceptable", "acceptable"]
+        self.labels: Final = labels
 
     @timing
-    def predict(self, input: str):
-        input_dict = {"sentence": input}
-        processed_input = self.processor.tokenize_data(input_dict)
-
-        onnx_inputs = {
-            "input_ids": np.expand_dims(processed_input["input_ids"], axis=0),
-            "attention_mask": np.expand_dims(processed_input["attention_mask"], axis=0),
-        }
-        # None will return all the outputs.
-        onnx_outputs = self.onnx_session.run(None, onnx_inputs)
-        scores = softmax(onnx_outputs[0])[0]
+    def predict(
+        self, x: torch.Tensor, topk: Optional[int] = None
+    ) -> List[Dict[str, float]]:
+        k: Final = x.size(-1) if topk is None else topk
+        logits: Final = self.onnx_session.run(None, {"input": x})[0]
+        probs: Final = softmax(logits, axis=1)
 
         predictions = list()
-        for score, label in zip(scores, self.lables):
-            predictions.append({"label": label, "score": score})
+        for _prob in np.split(probs, probs.shape[0], axis=0):
+            prob = _prob.flatten()
+
+            unsorted_index = np.argpartition(prob, -k)[-k:]
+            unsorted_value = prob[unsorted_index]
+
+            index = unsorted_index[np.argsort(-unsorted_value)]
+            value = prob[index]
+
+            _lables = [self.labels[i] for i in index.tolist()]
+            _probs = value.tolist()
+            predictions.append(dict(zip(_lables, _probs)))
 
         return predictions
+
+    @timing
+    def predict_labels(self, x: np.ndarray) -> List[str]:
+        logits: Final[np.ndarray] = self.onnx_session.run(None, {"input": x})[0]
+        predicted_indices: Final[List[int]] = np.argmax(logits, axis=1).tolist()
+
+        return [self.labels[i] for i in predicted_indices]

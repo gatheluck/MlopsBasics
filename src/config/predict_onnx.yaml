@@ -1,5 +1,5 @@
 defaults:
-  - data: cola
+  - data: cifar10
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
   - _self_
@@ -9,5 +9,4 @@ hydra:
     dir: outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
 
 onnx_model_path: models/model.onnx
-sentence: "The boy is sitting on a bench"
-batch_size: 64
+batch_size: 4
