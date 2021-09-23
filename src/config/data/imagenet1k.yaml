@@ -1,0 +1,2 @@
+_target_: src.factory.data.imagenet1k.ImageNet1kDataModule
+batch_size: ${batch_size}
