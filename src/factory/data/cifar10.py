@@ -1,6 +1,6 @@
 import pathlib
-from dataclasses import dataclass
-from typing import Any, Callable, Final, Optional, Tuple
+from dataclasses import dataclass, field
+from typing import Any, Callable, Final, List, Optional, Tuple
 
 import albumentations as albu
 import torchvision
@@ -16,6 +16,20 @@ class Cifar10Stats(DatasetStats):
     input_size: int = 32
     mean: Tuple[float, float, float] = (0.49139968, 0.48215841, 0.44653091)
     std: Tuple[float, float, float] = (0.24703223, 0.24348513, 0.26158784)
+    labels: List[str] = field(
+        default_factory=lambda: [
+            "airplane",
+            "automobile",
+            "bird",
+            "cat",
+            "deer",
+            "dog",
+            "frog",
+            "horse",
+            "ship",
+            "truck",
+        ]
+    )
 
 
 class CIAFR10(torchvision.datasets.CIFAR10):
@@ -57,9 +71,10 @@ class Cifar10DataModule(BaseDataModule):
         root (pathlib.Path): The root path which dataset exists. If not, try to download.
     """
 
+    dataset_stats: DatasetStats = Cifar10Stats()
+
     def __init__(self, batch_size: int, num_workers: int, root: pathlib.Path) -> None:
         super().__init__(batch_size, num_workers, root)
-        self.dataset_stats: DatasetStats = Cifar10Stats()
         self.root: Final[pathlib.Path] = root / "cifar10"
 
     def prepare_data(self, *args, **kwargs) -> None:

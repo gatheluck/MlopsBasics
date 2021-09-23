@@ -1,7 +1,7 @@
 import pathlib
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Final, Tuple
+from typing import Final, List, Tuple
 
 import pytorch_lightning as pl
 import torch
@@ -16,6 +16,7 @@ class DatasetStats(ABC):
     input_size: int = MISSING
     mean: Tuple[float, float, float] = MISSING
     std: Tuple[float, float, float] = MISSING
+    labels: List[str] = MISSING
 
 
 class BaseDataModule(pl.LightningDataModule, ABC):
@@ -93,3 +94,7 @@ class BaseDataModule(pl.LightningDataModule, ABC):
     @property
     def input_size(self) -> int:
         return self.dataset_stats.input_size
+
+    @property
+    def labels(self) -> List[str]:
+        return self.dataset_stats.labels
