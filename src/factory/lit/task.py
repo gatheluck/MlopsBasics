@@ -1,5 +1,5 @@
 import pathlib
-from typing import Dict, Final, List, Tuple
+from typing import Dict, Final, List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -168,30 +168,37 @@ class Classifier(pl.LightningModule):
 
 
 class ClassificationPredictor:
-    def __init__(self, classifier, processor) -> None:
+    def __init__(self, classifier: pl.LightningModule, labels: List[str]) -> None:
         self.classifier: Final = classifier
         self.classifier.eval()
         self.classifier.freeze()
 
-        self.processor: Final = processor
         self.softmax: Final = torch.nn.Softmax(dim=1)
-        self.lables: Final = ["unacceptable", "acceptable"]
+        self.labels: Final = labels
 
     @timing
-    def predict(self, input):
-        input_dict = {"sentence": input}
-        processed_input = self.processor.tokenize_data(input_dict)
-        logits = self.classifier(
-            torch.tensor([processed_input["input_ids"]]),
-            torch.tensor([processed_input["attention_mask"]]),
-        )
-        scores = self.softmax(logits[0]).tolist()[0]
+    def predict(
+        self, x: torch.Tensor, topk: Optional[int] = None
+    ) -> List[Dict[str, float]]:
+        k: Final = x.size(-1) if topk is None else topk
+        logits: Final = self.classifier(x)
+        probs: Final = self.softmax(logits)
 
         predictions = list()
-        for score, label in zip(scores, self.lables):
-            predictions.append({"label": label, "score": score})
+        for prob in probs.split(split_size=1, dim=0):
+            value, index = prob.squeeze().topk(k=k)
+            _lables = [self.labels[i] for i in index.tolist()]
+            _probs = value.tolist()
+            predictions.append(dict(zip(_lables, _probs)))
 
         return predictions
+
+    @timing
+    def predict_labels(self, x: torch.Tensor) -> List[str]:
+        logits = self.classifier(x)
+        predicted_indices: Final[List[int]] = torch.argmax(logits, 1).tolist()
+
+        return [self.labels[i] for i in predicted_indices]
 
 
 class OnnxClassificationPredictor:
