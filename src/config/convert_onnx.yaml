@@ -1,5 +1,5 @@
 defaults:
-  - data: cola
+  - data: cifar10
   - override hydra/job_logging: colorlog
   - override hydra/hydra_logging: colorlog
   - _self_
@@ -10,4 +10,4 @@ hydra:
 
 checkpoint_path: models/best-checkpoint.ckpt
 export_path: models/model.onnx
-batch_size: 64
+batch_size: 4

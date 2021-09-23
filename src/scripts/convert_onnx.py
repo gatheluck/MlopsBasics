@@ -22,34 +22,27 @@ def convert_to_onnx(cfg) -> None:
     model: Final = Classifier.load_from_checkpoint(checkpoint_path)
 
     # data module
-    data: Final = instantiate(cfg.data)
+    data: Final = instantiate(cfg.data, num_workers=4, root=cwd / "data")
     data.prepare_data()
     data.setup()
 
-    input_batch = next(iter(data.train_dataloader()))
-    input_sample = {
-        "input_ids": input_batch["input_ids"][0].unsqueeze(0),
-        "attention_mask": input_batch["attention_mask"][0].unsqueeze(0),
-    }
+    x, _ = next(iter(data.train_dataloader()))
+    input_sample = x[0].unsqueeze(0)
 
     # export the model
     logger.info("Converting the model into ONNX format.")
     torch.onnx.export(
         model,  # model being run
-        (
-            input_sample["input_ids"],
-            input_sample["attention_mask"],
-        ),  # model input (or a tuple for multiple inputs)
+        input_sample,  # model input (or a tuple for multiple inputs)
         str(export_path),  # where to save the model (can be a file or file-like object)
         export_params=True,
         opset_version=10,
-        input_names=["input_ids", "attention_mask"],  # the model's input names
-        output_names=["output"],  # the model's output names
+        input_names=["input"],  # the model's input names
+        output_names=["logits"],  # the model's output names
         # NOTE: if dynamic axes don't specified, size of all dim will be fixed.
         dynamic_axes={
-            "input_ids": {0: "batch_size"},  # variable length axes
-            "attention_mask": {0: "batch_size"},
-            "output": {0: "batch_size"},
+            "input": {0: "batch_size"},  # variable length axes
+            "logits": {0: "batch_size"},
         },
     )
 
