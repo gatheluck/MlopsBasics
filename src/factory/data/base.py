@@ -87,14 +87,22 @@ class BaseDataModule(pl.LightningDataModule, ABC):
         else:
             return dataset
 
-    @property
-    def num_classes(self) -> int:
-        return self.dataset_stats.num_classes
+    @classmethod
+    def get_num_classes(cls) -> int:
+        return cls.dataset_stats.num_classes
 
-    @property
-    def input_size(self) -> int:
-        return self.dataset_stats.input_size
+    @classmethod
+    def get_input_size(cls) -> int:
+        return cls.dataset_stats.input_size
 
-    @property
-    def labels(self) -> List[str]:
-        return self.dataset_stats.labels
+    @classmethod
+    def get_mean(cls) -> Tuple[float, float, float]:
+        return cls.dataset_stats.mean
+
+    @classmethod
+    def get_std(cls) -> Tuple[float, float, float]:
+        return cls.dataset_stats.std
+
+    @classmethod
+    def get_labels(cls) -> List[str]:
+        return cls.dataset_stats.labels

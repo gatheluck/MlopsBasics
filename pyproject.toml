@@ -67,6 +67,10 @@ module = "pandas"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
+module = "PIL"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
 module = "scipy.special"
 ignore_missing_imports = true
 
