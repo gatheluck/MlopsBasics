@@ -15,9 +15,9 @@ jobs:
     - uses: actions/checkout@v2
     - run: pwd && docker-compose --version && docker --version
 
-    - run: docker-compose build --parallel mlops_basics
+    - run: docker-compose build --parallel core
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
-    - run: docker-compose up -d mlops_basics
+    - run: docker-compose up -d core
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
 
     # pytest-cov export coverage data to a file
@@ -25,17 +25,17 @@ jobs:
     # chmod is needed to resolve above problem
     - run: chmod 777 .
 
-    - run: docker-compose exec -T mlops_basics poetry install --no-interaction
+    - run: docker-compose exec -T core poetry install --no-interaction
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
 
-    - run: docker-compose exec -T mlops_basics make black
+    - run: docker-compose exec -T core make black
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
-    - run: docker-compose exec -T mlops_basics make flake8
+    - run: docker-compose exec -T core make flake8
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}    
-    - run: docker-compose exec -T mlops_basics make isort
+    - run: docker-compose exec -T core make isort
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
-    - run: docker-compose exec -T mlops_basics make mypy
+    - run: docker-compose exec -T core make mypy
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
 
-    - run: docker-compose exec -T mlops_basics make test
+    - run: docker-compose exec -T core make test
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
