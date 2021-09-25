@@ -51,11 +51,15 @@ class CIAFR10(torchvision.datasets.CIFAR10):
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
         """
+
         Args:
-            index (int): Index
+            index (int): An index of data.
+
         Returns:
-            tuple: (image, target) where target is index of the target class.
+            Tuple[Any, Any]: (image, target) where target is a class index of the target class.
+
         """
+        # Shape of img is (h, w, c)
         img, target = self.data[index], self.targets[index]
 
         if self.transform:
@@ -66,9 +70,11 @@ class CIAFR10(torchvision.datasets.CIFAR10):
 
 class Cifar10DataModule(BaseDataModule):
     """The LightningDataModule for CIFAR-10 dataset.
+
     Attributes:
         dataset_stats (DatasetStats): The dataclass which holds dataset statistics.
         root (pathlib.Path): The root path which dataset exists. If not, try to download.
+
     """
 
     dataset_stats: DatasetStats = Cifar10Stats()
@@ -88,27 +94,47 @@ class Cifar10DataModule(BaseDataModule):
         self.train_dataset: Dataset = CIAFR10(
             root=self.root,
             train=True,
-            transform=self._get_transform(train=True),
+            transform=self.get_transform(train=True),
             download=True,
         )
 
         self.val_dataset: Dataset = CIAFR10(
             root=self.root,
             train=False,
-            transform=self._get_transform(train=False),
+            transform=self.get_transform(train=False),
             download=True,
         )
 
-    def _get_transform(
-        self,
+    @classmethod
+    def get_transform(
+        cls,
         train: bool,
         normalize: bool = True,
+        to_tensor: bool = True,
     ) -> albu.Compose:
+        """Return composed transform operations.
+
+        Args:
+            train (bool): If True, return transforms for training.
+            normalize (bool): If True, transform includes normalization operation.
+            to_tensor (bool): If True, transform includes conversion to pytorch tensor.
+                If False, transformed image's type will be np.ndarray shape of (h, w, c).
+
+        Returns:
+            albu.Compose: Composed transform operations.
+
+        Note:
+            If you want to apply composed transforms to `img`, please execute like following.
+
+            >>> trasform = class_name.get_trasnform(train=False)
+            >>> img = transform(image=img)["image"]
+
+        """
         transform = list()
 
-        input_size: Final = self.input_size
-        mean: Final = self.dataset_stats.mean
-        std: Final = self.dataset_stats.std
+        input_size: Final = cls.get_input_size()
+        mean: Final = cls.get_mean()
+        std: Final = cls.get_std()
 
         if train:
             transform.extend(
@@ -130,5 +156,7 @@ class Cifar10DataModule(BaseDataModule):
                 [albu.augmentations.transforms.Normalize(mean=mean, std=std)]
             )
 
-        transform.extend([ToTensorV2()])
+        if to_tensor:
+            transform.extend([ToTensorV2()])
+
         return albu.Compose(transform)
