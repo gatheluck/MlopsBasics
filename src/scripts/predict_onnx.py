@@ -22,13 +22,13 @@ def main(cfg) -> None:
     data: Final = instantiate(cfg.data, num_workers=4, root=cwd / "data")
     data.prepare_data()
     data.setup()
-    labels: Final = data.labels
+    labels: Final = data.get_labels()
 
     predictor: Final = OnnxClassificationPredictor(onnx_model_path, labels)
 
     dataloader: Final = data.test_dataloader()
     for i, (_x, _) in enumerate(dataloader):
-        x = _x.cpu().numpy()
+        x = _x.cpu().numpy()  # (b, c, h, w)
         if i >= 10:
             break
         if i == 0:

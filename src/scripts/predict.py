@@ -23,7 +23,7 @@ def main(cfg) -> None:
     data: Final = instantiate(cfg.data, num_workers=4, root=cwd / "data")
     data.prepare_data()
     data.setup()
-    labels: Final = data.labels
+    labels: Final = data.get_labels()
 
     classifier: pl.LightningModule = Classifier.load_from_checkpoint(checkpoint_path)
     predictor: Final = ClassificationPredictor(classifier, labels)
