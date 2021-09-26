@@ -23,8 +23,6 @@ services:
     runtime: nvidia
     environment:
       NVIDIA_VISIBLE_DEVICES: all
-      GDRIVE_ID: ${GDRIVE_ID}
-      GDRIVE_CREDS_PATH: ${GDRIVE_CREDS_PATH}
     build: 
       context: ../../
       dockerfile: environments/continuous_integration/Dockerfile-app
@@ -32,6 +30,8 @@ services:
       args:
         PYTHON_VERSION: 3.9
         APPLICATION_DIRECTORY: /mlops_basics
+        GDRIVE_ID: ${GDRIVE_ID}
+        GDRIVE_CREDS_PATH: ${GDRIVE_CREDS_PATH}
     ports:
       - "8000:8000"
     stdin_open: true
