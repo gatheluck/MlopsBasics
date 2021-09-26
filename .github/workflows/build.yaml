@@ -1,0 +1,32 @@
+name: CI
+
+on: [pull_request]
+
+env:
+  DOCKER_COMPOSE_DIRECTORY: environments/continuous_integration
+  GDRIVE_CREDS_PATH: gdrive_creds.json
+  COMPOSE_DOCKER_CLI_BUILD: 1
+  DOCKER_BUILDKIT: 1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    
+    - name: show info
+      run: pwd && docker-compose --version && docker --version
+
+    - name: create gdrive credentianl file
+      run: |
+        touch ${{ env.GDRIVE_CREDS_PATH }}
+        echo '${{ secrets.GDRIVE_CREDS }}' >> ${{ env.GDRIVE_CREDS_PATH }}
+
+    - name: build
+      run: docker-compose build --parallel app
+      working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
+      env:
+        GDRIVE_ID: ${{ secrets.GDRIVE_ID }}
+        GDRIVE_CREDS_PATH: ${{ env.GDRIVE_CREDS_PATH }}
