@@ -17,7 +17,7 @@ jobs:
       uses: actions/checkout@v2
     
     - name: show info
-    - run: pwd && docker-compose --version && docker --version
+      run: pwd && docker-compose --version && docker --version
 
     - name: create gdrive credentianl file
       run: |
