@@ -22,7 +22,7 @@ jobs:
     - name: create gdrive credentianl file
       run: |
         touch ${{ env.GDRIVE_CREDS_PATH }}
-        echo "${{ secrets.GDRIVE_CREDS }}" >> ${{ env.GDRIVE_CREDS_PATH }}
+        echo '${{ secrets.GDRIVE_CREDS }}' >> ${{ env.GDRIVE_CREDS_PATH }}
 
     - name: check
       run: |
