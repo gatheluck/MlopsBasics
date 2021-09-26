@@ -35,11 +35,11 @@ WORKDIR ${APPLICATION_DIRECTORY}
 RUN poetry install --no-dev && rm -rf /home/python/.cache/pip
 
 # Init dvc
-RUN dvc init --no-scm
+RUN poetry run dvc init --no-scm
 # Configuring remote server in dvc
-RUN dvc remote add -d storage ${GDRIVE_ID}
-RUN dvc remote modify storage gdrive_use_service_account true
-RUN dvc remote modify storage gdrive_service_account_json_file_path ${GDRIVE_CREDS_PATH}
+RUN poetry run dvc remote add -d storage ${GDRIVE_ID}
+RUN poetry run dvc remote modify storage gdrive_use_service_account true
+RUN poetry run dvc remote modify storage gdrive_service_account_json_file_path ${GDRIVE_CREDS_PATH}
 
 # Pulling the trained model
-RUN dvc pull dvcfiles/trained_model.dvc
+RUN poetry run dvc pull dvcfiles/trained_model.dvc
