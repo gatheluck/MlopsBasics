@@ -28,7 +28,7 @@ jobs:
       run: |
         pwd
         ls .
-        ls ${{ env.GDRIVE_CREDS_PATH }}
+        cat ${{ env.GDRIVE_CREDS_PATH }}
 
     - name: build
       run: docker-compose build --parallel app
