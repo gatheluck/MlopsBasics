@@ -22,9 +22,9 @@ services:
     container_name: mlops_basics_continuous_integration_app
     # runtime: nvidia
     environment:
-      - NVIDIA_VISIBLE_DEVICES: all
-      - GDRIVE_ID: ${GDRIVE_ID}
-      - GDRIVE_CREDS_PATH: ${GDRIVE_CREDS_PATH}
+      NVIDIA_VISIBLE_DEVICES: all
+      GDRIVE_ID: ${GDRIVE_ID}
+      GDRIVE_CREDS_PATH: ${GDRIVE_CREDS_PATH}
     build: 
       context: ../../
       dockerfile: environments/continuous_integration/Dockerfile-app
