@@ -35,7 +35,7 @@ WORKDIR ${APPLICATION_DIRECTORY}
 RUN poetry install --no-dev && rm -rf /home/python/.cache/pip
 
 # Init dvc
-RUN poetry run dvc init --no-scm
+RUN poetry run dvc init -f --no-scm
 # Configuring remote server in dvc
 RUN poetry run dvc remote add -d storage ${GDRIVE_ID}
 RUN poetry run dvc remote modify storage gdrive_use_service_account true
