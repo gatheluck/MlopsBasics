@@ -20,7 +20,7 @@ services:
 
   app:
     container_name: mlops_basics_continuous_integration_app
-    # runtime: nvidia
+    runtime: nvidia
     environment:
       NVIDIA_VISIBLE_DEVICES: all
       GDRIVE_ID: ${GDRIVE_ID}
