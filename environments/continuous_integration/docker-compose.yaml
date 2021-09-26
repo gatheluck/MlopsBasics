@@ -17,3 +17,24 @@ services:
     user: 1000:1000
     volumes:
       - ../../../MlopsBasics:/mlops_basics
+
+  app:
+    container_name: mlops_basics_continuous_integration_app
+    # runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES: all
+      - GDRIVE_ID: ${GDRIVE_ID}
+      - GDRIVE_CREDS_PATH: ${GDRIVE_CREDS_PATH}
+    build: 
+      context: ../../
+      dockerfile: environments/continuous_integration/Dockerfile-app
+      shm_size: 12G
+      args:
+        PYTHON_VERSION: 3.9
+        APPLICATION_DIRECTORY: /mlops_basics
+    ports:
+      - "8000:8000"
+    stdin_open: true
+    tty: true
+    user: 1000:1000
+    command: poetry run uvicorn 'src.app.wsgi:main' --host 0.0.0.0 --port 8000
