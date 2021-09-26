@@ -24,12 +24,6 @@ jobs:
         touch ${{ env.GDRIVE_CREDS_PATH }}
         echo '${{ secrets.GDRIVE_CREDS }}' >> ${{ env.GDRIVE_CREDS_PATH }}
 
-    - name: check
-      run: |
-        pwd
-        ls .
-        cat ${{ env.GDRIVE_CREDS_PATH }}
-
     - name: build
       run: docker-compose build --parallel app
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
