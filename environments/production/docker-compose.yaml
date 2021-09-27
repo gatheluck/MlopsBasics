@@ -18,4 +18,4 @@ services:
     stdin_open: true
     tty: true
     user: 1000:1000
-    command: poetry run uvicorn 'src.app.wsgi:main' --host 0.0.0.0 --port 8000
+    # command: poetry run uvicorn 'src.app.wsgi:main' --host 0.0.0.0 --port 8000

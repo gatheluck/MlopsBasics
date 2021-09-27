@@ -2,7 +2,8 @@ version: "3.8"
 
 services: 
   core:
-    container_name: mlops_basics_continuous_integration_core
+    image: mlops_basics_core:latest
+    container_name: mlops_basics_core
     build: 
       context: ../../
       dockerfile: environments/development/Dockerfile-core
@@ -19,7 +20,8 @@ services:
       - ../../../MlopsBasics:/mlops_basics
 
   app:
-    container_name: mlops_basics_continuous_integration_app
+    image: mlops-basics:latest
+    container_name: mlops-basics
     runtime: nvidia
     environment:
       NVIDIA_VISIBLE_DEVICES: all
@@ -30,11 +32,14 @@ services:
       args:
         PYTHON_VERSION: 3.9
         APPLICATION_DIRECTORY: /mlops_basics
-        GDRIVE_ID: ${GDRIVE_ID}
-        GDRIVE_CREDS_PATH: ${GDRIVE_CREDS_PATH}
+        # GDRIVE_ID: ${GDRIVE_ID}
+        # GDRIVE_CREDS_PATH: ${GDRIVE_CREDS_PATH}
+        S3_URL: ${S3_URL}
+        AWS_ACCOUNT_ID: ${AWS_ACCOUNT_ID}
+        AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
     ports:
       - "8000:8000"
     stdin_open: true
     tty: true
     user: 1000:1000
-    command: poetry run uvicorn 'src.app.wsgi:main' --host 0.0.0.0 --port 8000

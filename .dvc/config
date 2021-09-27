@@ -1,4 +1,6 @@
 [core]
-    remote = storage
+    remote = model-store
 ['remote "storage"']
     url = gdrive://1GqzlAw2VZkfVXHutMYCvKoNbO4EbTvTs
+['remote "model-store"']
+    url = s3://gatheluck-models-dvc/trained_models/

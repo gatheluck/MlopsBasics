@@ -1,4 +1,5 @@
 FROM nvidia/cuda:11.0-devel-ubuntu20.04
+SHELL ["/bin/bash", "-c"]
 
 ARG PYTHON_VERSION
 ARG APPLICATION_DIRECTORY
@@ -33,3 +34,5 @@ COPY --chown=${USER_NAME}:${USER_NAME} . ${APPLICATION_DIRECTORY}/
 
 WORKDIR ${APPLICATION_DIRECTORY}
 RUN poetry install --no-dev && rm -rf /home/python/.cache/pip
+
+CMD poetry run uvicorn src.app.wsgi:main --host 0.0.0.0 --port 8000
