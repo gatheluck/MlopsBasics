@@ -1,6 +1,6 @@
 name: CI
 
-on: [push]
+on: [pull_request]
 
 env:
   DOCKER_COMPOSE_DIRECTORY: environments/continuous_integration
