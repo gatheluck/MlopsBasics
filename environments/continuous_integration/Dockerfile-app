@@ -1,4 +1,5 @@
 FROM nvidia/cuda:11.0-devel-ubuntu20.04
+SHELL ["/bin/bash", "-c"]
 
 ARG PYTHON_VERSION
 ARG APPLICATION_DIRECTORY
@@ -60,3 +61,5 @@ RUN poetry run dvc remote add -d storage ${S3_URL}
 
 # Pulling the trained model
 RUN poetry run dvc pull dvcfiles/onnx_model.dvc
+
+CMD poetry run uvicorn src.app.wsgi:main --host 0.0.0.0 --port 8000
