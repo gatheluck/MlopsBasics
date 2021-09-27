@@ -20,8 +20,8 @@ services:
       - ../../../MlopsBasics:/mlops_basics
 
   app:
-    image: mlops_basics_app:latest
-    container_name: mlops_basics_app
+    image: mlops-basics:latest
+    container_name: mlops-basics
     runtime: nvidia
     environment:
       NVIDIA_VISIBLE_DEVICES: all
