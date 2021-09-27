@@ -37,6 +37,7 @@ jobs:
       env:
         # GDRIVE_ID: ${{ secrets.GDRIVE_ID }}
         # GDRIVE_CREDS_PATH: ${{ env.GDRIVE_CREDS_PATH }}
+        S3_URL: ${{ secrets.S3_URL }}
         AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
