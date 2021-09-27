@@ -59,4 +59,4 @@ RUN poetry run dvc init -f --no-scm
 RUN poetry run dvc remote add -d storage ${S3_URL}
 
 # Pulling the trained model
-RUN poetry run dvc pull dvcfiles/trained_model.dvc
+RUN poetry run dvc pull dvcfiles/onnx_model.dvc
