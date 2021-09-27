@@ -1,10 +1,10 @@
 name: CI
 
-on: [pull_request]
+on: [push]
 
 env:
   DOCKER_COMPOSE_DIRECTORY: environments/continuous_integration
-  GDRIVE_CREDS_PATH: gdrive_creds.json
+  # GDRIVE_CREDS_PATH: gdrive_creds.json
   COMPOSE_DOCKER_CLI_BUILD: 1
   DOCKER_BUILDKIT: 1
 
@@ -19,14 +19,33 @@ jobs:
     - name: show info
       run: pwd && docker-compose --version && docker --version
 
-    - name: create gdrive credentianl file
-      run: |
-        touch ${{ env.GDRIVE_CREDS_PATH }}
-        echo '${{ secrets.GDRIVE_CREDS }}' >> ${{ env.GDRIVE_CREDS_PATH }}
+    # - name: create gdrive credentianl file
+    #   run: |
+    #     touch ${{ env.GDRIVE_CREDS_PATH }}
+    #     echo '${{ secrets.GDRIVE_CREDS }}' >> ${{ env.GDRIVE_CREDS_PATH }}
+
+    - name: configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
 
     - name: build
       run: docker-compose build --parallel app
       working-directory: ${{ env.DOCKER_COMPOSE_DIRECTORY }}
       env:
-        GDRIVE_ID: ${{ secrets.GDRIVE_ID }}
-        GDRIVE_CREDS_PATH: ${{ env.GDRIVE_CREDS_PATH }}
+        # GDRIVE_ID: ${{ secrets.GDRIVE_ID }}
+        # GDRIVE_CREDS_PATH: ${{ env.GDRIVE_CREDS_PATH }}
+        AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: push to ecr
+      id: ecr
+      uses: jwalton/gh-ecr-push@v1
+      with:
+        access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: ap-northeast-1
+          image: mlops_basics_app:latest
