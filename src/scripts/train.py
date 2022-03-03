@@ -57,7 +57,7 @@ def main(cfg) -> None:
     data: Final = instantiate(cfg.data, num_workers=4, root=cwd / "data")
 
     # task
-    num_classes: Final = data.num_classes
+    num_classes: Final = data.get_num_classes()
     encoder: torch.nn.Module = instantiate(cfg.encoder, num_classes=num_classes)
     classifier: pl.LightningModule = Classifier(
         encoder=encoder,

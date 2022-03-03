@@ -1,0 +1,8 @@
+.github
+.mypy_cache
+.pytest_cache
+.venv
+data
+dvcfiles
+models
+outputs
