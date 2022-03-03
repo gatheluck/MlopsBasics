@@ -14,14 +14,13 @@ services:
       shm_size: 12G
       args:
         PYTHON_VERSION: 3.9
-        APPLICATION_DIRECTORY: /mlops_basics
     ports:
       - 3001:3001
     stdin_open: true
     tty: true
     user: 1000:1000
     volumes:
-      - ../../../mlops_basics:/mlops_basics
+      - ../../../mlops_basics:/home/default/mlops_basics
  
   app:
     container_name: mlops_basics_development_app
@@ -34,11 +33,10 @@ services:
       shm_size: 12G
       args:
         PYTHON_VERSION: 3.9
-        APPLICATION_DIRECTORY: /mlops_basics
     ports:
       - "8000:8000"
     stdin_open: true
     tty: true
     user: 1000:1000
     volumes:
-      - ../../../mlops_basics:/mlops_basics
+      - ../../../mlops_basics:/home/default/mlops_basics
